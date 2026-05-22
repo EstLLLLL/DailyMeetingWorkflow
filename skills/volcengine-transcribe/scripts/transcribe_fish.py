@@ -177,15 +177,20 @@ def get_duration_seconds(audio_file: Path) -> float:
 
 
 def export_chunk(audio_file: Path, output_file: Path, start_sec: int, duration_sec: int) -> None:
-    subprocess.run(
-        [
-            "ffmpeg", "-y", "-v", "error",
-            "-ss", str(start_sec), "-t", str(duration_sec),
-            "-i", str(audio_file),
-            "-c", "copy", str(output_file),
-        ],
-        check=True, capture_output=True, text=True,
-    )
+    """Export an audio slice to an .m4a chunk.
+
+    Fast lossless stream copy when the source is already AAC/m4a-compatible;
+    falls back to re-encoding to AAC for other formats (wav, mp3, flac, ...).
+    """
+    seek = ["ffmpeg", "-y", "-v", "error", "-ss", str(start_sec), "-t", str(duration_sec), "-i", str(audio_file)]
+    try:
+        subprocess.run(seek + ["-c", "copy", str(output_file)], check=True, capture_output=True, text=True)
+        if output_file.exists() and output_file.stat().st_size > 0:
+            return
+    except subprocess.CalledProcessError:
+        pass
+    # Fallback: re-encode to AAC (handles non-m4a sources).
+    subprocess.run(seek + ["-c:a", "aac", "-b:a", "128k", str(output_file)], check=True, capture_output=True, text=True)
 
 
 # ---------------------------------------------------------------------------
