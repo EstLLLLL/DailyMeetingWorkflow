@@ -6,6 +6,7 @@
 
 | Skill | 作用 |
 |---|---|
+| [`daily-meeting-minute`](skills/daily-meeting-minute/SKILL.md) | 每日例行：从 iCloud `Recordings` 文件夹挑出最新录音，交给 `volcengine-transcribe` 整理成 meeting memo。 |
 | [`volcengine-transcribe`](skills/volcengine-transcribe/SKILL.md) | 用 Volcengine Doubao Speech 或 ElevenLabs 转录录音，再经 Ark 生成 Obsidian meeting memo（详细摘要 + Q&A 风格转录）。 |
 | [`interview-summary`](skills/interview-summary/SKILL.md) | 按主持人核心问题的顺序，对访谈/播客/Q&A 做结构化、可复盘的高质量摘要。 |
 | [`bilingual-interview`](skills/bilingual-interview/SKILL.md) | 把英文访谈转录整理成中英对照的 Markdown，便于在 Obsidian 中阅读。 |
@@ -14,10 +15,9 @@
 
 完整的 daily / weekly 流程目标如下，部分环节尚未落库：
 
-1. **抓取当天新录音** —— 从 iCloud 文件夹拉取当天新增录音（待补 skill / 脚本）。
-2. **转录** —— `volcengine-transcribe`。
-3. **更新 Obsidian dashboard** —— 把 memo 汇总到 dashboard（目前只写单条 memo，dashboard 汇总待补）。
-4. **Weekly meeting review** —— 每周对会议做回顾（待补 skill）。
+1. **抓取当天新录音 + 转录** —— `daily-meeting-minute`：从 iCloud `Recordings` 挑最新录音，调用 `volcengine-transcribe` 写进 meeting memo。
+2. **更新 Obsidian dashboard** —— 把 memo 汇总到 dashboard（目前只写单条 memo，dashboard 汇总待补）。
+3. **Weekly meeting review** —— 每周对会议做回顾（待补 skill）。
 
 ## 待补充
 
