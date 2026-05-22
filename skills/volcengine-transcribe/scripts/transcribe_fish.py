@@ -444,7 +444,17 @@ def _terms_block(keyterms: list[str]) -> str:
     return "\n专有名词参考（用于纠正同音字/术语识别错误）：" + "、".join(keyterms[:200]) + "\n"
 
 
-def build_polish_prompt(transcript: str, speaker_aliases: dict[str, str] | None, keyterms: list[str]) -> list[dict[str, str]]:
+def _participant_block(participants: str) -> str:
+    names = [p.strip() for p in (participants or "").split(",") if p.strip()]
+    if not names:
+        return ""
+    return (
+        "\n本次会议参会人可能包括：" + "、".join(names)
+        + "（仅作说话人识别提示，不确定时不要硬套到具体句子上）。\n"
+    )
+
+
+def build_polish_prompt(transcript: str, speaker_aliases: dict[str, str] | None, keyterms: list[str], participants: str = "") -> list[dict[str, str]]:
     alias_rules = speaker_alias_instructions(speaker_aliases or {})
     diarize_instruction = (
         "转写来自没有说话人区分的 ASR，所有内容都没有 speaker 标签。"
@@ -467,7 +477,7 @@ def build_polish_prompt(transcript: str, speaker_aliases: dict[str, str] | None,
                 "**不确定标注**：如果某处错得明显但你对正确版本把握不足（多种合理猜测、专有名词无法确认、关键数字含糊等），"
                 "保留你认为最可能的版本，并在该处用 `[?: 原转写=\"xxx\"，不确定]` 形式行内标注，提示用户人工核对，不要静默猜测。"
                 "不新增原文没有的结论，不遗漏关键数字和论点。输出 Markdown。\n"
-                f"{alias_rules}{_terms_block(keyterms)}"
+                f"{alias_rules}{_participant_block(participants)}{_terms_block(keyterms)}"
             ),
         },
         {
@@ -489,7 +499,7 @@ def build_polish_prompt(transcript: str, speaker_aliases: dict[str, str] | None,
     ]
 
 
-def build_summary_prompt(transcript: str, source_label: str, speaker_aliases: dict[str, str] | None) -> list[dict[str, str]]:
+def build_summary_prompt(transcript: str, source_label: str, speaker_aliases: dict[str, str] | None, participants: str = "") -> list[dict[str, str]]:
     alias_rules = speaker_alias_instructions(speaker_aliases or {})
     return [
         {
@@ -502,7 +512,7 @@ def build_summary_prompt(transcript: str, source_label: str, speaker_aliases: di
                 "根据类型选择对应的输出框架（见 user message）。\n"
                 "禁止编造未提及的信息。"
                 "语言要直接、克制、像正式 memo，不要写客套话、免责声明、过程说明或'根据转写生成'等套话。"
-                f"\n{alias_rules}"
+                f"\n{alias_rules}{_participant_block(participants)}"
             ),
         },
         {
@@ -587,17 +597,17 @@ def chunk_transcript_text(transcript: str, max_chars: int = 12000) -> list[str]:
     return chunks
 
 
-def build_polished_transcript(transcript: str, speaker_aliases: dict[str, str] | None, keyterms: list[str]) -> str:
+def build_polished_transcript(transcript: str, speaker_aliases: dict[str, str] | None, keyterms: list[str], participants: str = "") -> str:
     chunks = chunk_transcript_text(transcript)
     if not chunks:
         return ""
     if len(chunks) == 1:
-        return deepseek_chat(build_polish_prompt(chunks[0], speaker_aliases, keyterms))
+        return deepseek_chat(build_polish_prompt(chunks[0], speaker_aliases, keyterms, participants))
 
     parts: list[str] = []
     total = len(chunks)
     for index, chunk in enumerate(chunks, start=1):
-        prompt = build_polish_prompt(chunk, speaker_aliases, keyterms)
+        prompt = build_polish_prompt(chunk, speaker_aliases, keyterms, participants)
         prompt[1]["content"] = (
             f"这是整场会议转写的第 {index}/{total} 段。"
             "请只整理这一段，不要补写前后内容，也不要写总结性过渡语。\n\n"
@@ -626,6 +636,7 @@ def save_outputs(
     skip_polish: bool,
     speaker_aliases: dict[str, str],
     keyterms: list[str],
+    participants: str = "",
 ) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y-%m-%d")
@@ -640,9 +651,9 @@ def save_outputs(
         summary = "Polishing skipped."
     else:
         print("[polish] generating polished transcript with DeepSeek...", flush=True)
-        polished_transcript = build_polished_transcript(transcript_text, speaker_aliases, keyterms)
+        polished_transcript = build_polished_transcript(transcript_text, speaker_aliases, keyterms, participants)
         print("[summary] generating summary with DeepSeek...", flush=True)
-        summary = deepseek_chat(build_summary_prompt(transcript_text, source_label, speaker_aliases))
+        summary = deepseek_chat(build_summary_prompt(transcript_text, source_label, speaker_aliases, participants))
 
     polished_transcript = normalize_generated_text(polished_transcript, speaker_aliases)
     summary = normalize_generated_text(summary, speaker_aliases)
@@ -686,7 +697,7 @@ def main() -> int:
         raise SystemExit("Fish Audio returned no transcript text.")
     print(f"[transcribe] got {len(utterances)} utterances", flush=True)
 
-    save_outputs(Path(args.out_dir), response, utterances, source_label, args.skip_polish, speaker_aliases, keyterms)
+    save_outputs(Path(args.out_dir), response, utterances, source_label, args.skip_polish, speaker_aliases, keyterms, args.participant)
     print("Done.", flush=True)
     return 0
 
