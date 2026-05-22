@@ -45,8 +45,12 @@ the `volcengine-transcribe` skill for transcription and memo generation.
 5. Confirm the memo landed in the meeting memo folder and report the file name.
 
 ## Decision Rules
-- "Newest recording" means most recently modified audio file under the Recordings
-  folder, ignoring hidden support files like `.CloudRecordings_SUPPORT`.
+- "Newest recording" is judged by the `YYYYMMDD` date prefix in the filename,
+  not by mtime: iCloud sync rewrites modification times, so a file recorded
+  yesterday can show today's mtime. mtime is only a tie-breaker among files with
+  the same date prefix. Hidden support files like `.CloudRecordings_SUPPORT` are
+  ignored.
+- `--today` returns only files whose filename date prefix equals today's date.
 - If a file is a Voice Memos `.qta`, let `volcengine-transcribe` handle the
   `.qta` → `.m4a` conversion; do not pre-convert here.
 - Never transcribe silently. Always confirm the picked file with the user first,
