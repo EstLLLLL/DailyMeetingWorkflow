@@ -1,0 +1,14 @@
+# keyterms — personal terminology list (one term per line)
+#
+# Copy this file to keyterms.txt and fill in your own domain terms, then pass it
+# with --keyterms-file. The real keyterms.txt is gitignored: everyone's terms
+# differ, so keep your own list out of the repo.
+#
+# These terms are fed to DeepSeek during polishing as hints, to help correct
+# homophone / jargon ASR errors. Lines starting with # are ignored.
+#
+# Examples (replace with your own):
+# 估值倍数
+# 竞业协议
+# ARR
+# product-market fit

@@ -80,13 +80,7 @@ bash skills/daily-meeting-minute/scripts/find_latest_recording.sh --latest
   以文件名里的 `YYYYMMDD` 前缀判断「今天/最新」，mtime 仅作兜底排序。录音文件名需带日期前缀。
 - **DeepSeek 直连**：润色走 DeepSeek 官方 API，不经 Volcengine Ark；如需换平台改
   `DEEPSEEK_BASE_URL` + `DEEPSEEK_MODEL`。
+- **keyterms 是个人词表**：`--keyterms-file` 指向的术语表因人/因行业而异。仓库只放
+  `keyterms.example.txt` 模板；复制成 `keyterms.txt`（已 gitignore）填自己的词，不会被提交。
 - **格式因人而异**：`weekly-meeting-review` 的版式按作者习惯（见
   `references/format-skeleton.md`），`meeting-dashboard` 的布局/位置同理，复用时按需调整。
-- **legacy 脚本**：`transcribe_volcengine*.py` / `transcribe_elevenlabs.py` 等为旧路径，
-  当前主路径是 `transcribe_fish.py`。
-
-## 待补充
-
-- 旧的 `volcengine-transcribe/SKILL.md` 正文仍是 Volcengine/ElevenLabs 时期的写法，待改写为
-  Fish + DeepSeek 为中心（`CLAUDE.md` 已更新为当前管线）。
-- 本地已有的 legacy 脚本与 `keyterms.txt` 尚未全部入库。

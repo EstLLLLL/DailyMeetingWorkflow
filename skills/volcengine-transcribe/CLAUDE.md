@@ -15,11 +15,9 @@ This project defines the `/transcribe` Claude Code slash command for audio trans
 3. **Output** — write `result.json`, `transcript.srt`, and an Obsidian meeting memo.
 
 ## Underlying Scripts
-- `scripts/transcribe_fish.py` — Primary: Fish ASR (direct) + DeepSeek (direct) → memo.
-- `scripts/keyterms.txt` — Domain-specific terms for better ASR recognition (edit as needed).
-- `scripts/transcribe_volcengine.py` — Legacy: Volcengine Doubao flash API.
-- `scripts/transcribe_volcengine_full.py` — Legacy: chunked transcription for large files.
-- `scripts/transcribe_elevenlabs.py` — Legacy: ElevenLabs Scribe v2 (replaced by Fish).
+- `scripts/transcribe_fish.py` — Fish ASR (direct) + DeepSeek (direct) → memo.
+- `scripts/keyterms.example.txt` — template for a personal terminology list. Copy to
+  `keyterms.txt` (gitignored), fill in your own terms, pass via `--keyterms-file`.
 
 ## Output Directory
 `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Esther Workspace/Raw/meeting memo/`

@@ -85,9 +85,7 @@ python3 skills/volcengine-transcribe/scripts/transcribe_fish.py ./meeting.m4a --
   `$VOLCENGINE_OBSIDIAN_MEETING_MEMO_DIR`, then a personal default (change it).
 
 ## Reference Map
-- `scripts/transcribe_fish.py`: primary path — Fish ASR (direct, ffmpeg-chunked) +
-  DeepSeek (direct) polish/summary → Obsidian memo.
-- `scripts/keyterms.txt`: domain terms fed to polishing as terminology hints (optional).
-- `scripts/transcribe_volcengine.py`, `scripts/transcribe_volcengine_full.py`,
-  `scripts/transcribe_elevenlabs.py`: legacy paths kept for reference, not the
-  current default.
+- `scripts/transcribe_fish.py`: the transcription script — Fish ASR (direct,
+  ffmpeg-chunked) + DeepSeek (direct) polish/summary → Obsidian memo.
+- `scripts/keyterms.example.txt`: template for a personal terminology list. Copy it
+  to `keyterms.txt` (gitignored), fill in your own terms, and pass `--keyterms-file`.

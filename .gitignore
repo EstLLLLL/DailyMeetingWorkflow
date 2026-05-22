@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 .fish-chunks-*/
 .elevenlabs-chunks-*/
+
+# Personal terminology list — copy keyterms.example.txt to keyterms.txt
+skills/volcengine-transcribe/scripts/keyterms.txt
