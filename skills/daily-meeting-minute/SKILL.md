@@ -31,17 +31,15 @@ the `volcengine-transcribe` skill for transcription and memo generation.
    - 参会人有哪些？
    - 关键词有哪些？
 4. Hand the chosen file to the `volcengine-transcribe` skill, writing into the
-   meeting memo folder. For a normal-length recording:
+   Meeting Memo folder. The primary path is Fish ASR (direct) + DeepSeek (direct):
    ```bash
-   python3 "$VOLCENGINE_TRANSCRIBE_CLI" \
+   python3 skills/volcengine-transcribe/scripts/transcribe_fish.py \
      "<latest-recording-path>" \
-     --language zh-CN \
+     --language zh \
      --participant "<participants>" \
      --keyword "<keywords>" \
      --out-dir "$VOLCENGINE_OBSIDIAN_MEETING_MEMO_DIR"
    ```
-   For a long recording (over the flash limits), use the chunked CLI
-   (`VOLCENGINE_TRANSCRIBE_FULL_CLI`) instead, per the `volcengine-transcribe` skill.
 5. Confirm the memo landed in the meeting memo folder and report the file name.
 
 ## Decision Rules

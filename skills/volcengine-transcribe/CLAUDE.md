@@ -5,21 +5,21 @@ This project defines the `/transcribe` Claude Code slash command for audio trans
 ## Slash Command
 `~/.claude/commands/transcribe.md` — invoke with `/transcribe <audio-file-path>`
 
-## ASR Provider (current direction)
-ASR uses **Fish Audio directly via its own API** — the single ASR path. Do not run
-ElevenLabs first with a Fish fallback, and do not route Fish through Doubao /
-Volcengine Ark. Call Fish Audio's native speech-to-text API.
-
-> TODO: implement the Fish-direct ASR path. Needs the Fish Audio ASR API details
-> (endpoint, auth/`FISH_API_KEY`, model). The scripts below predate this decision.
+## Pipeline
+1. **ASR — Fish Audio, direct API** (`POST https://api.fish.audio/v1/asr`). This is
+   the single ASR path: no ElevenLabs-first fallback, and Fish is called through its
+   own API, not via Doubao / Volcengine Ark. Fish returns timestamped segments but
+   no speaker diarization, so speaker attribution is best-effort.
+2. **Polish + summary — DeepSeek, direct API** (`https://api.deepseek.com`). Not via
+   Ark/Doubao. Produces a polished Q&A transcript and a Chinese summary.
+3. **Output** — write `result.json`, `transcript.srt`, and an Obsidian meeting memo.
 
 ## Underlying Scripts
-All scripts live in `~/.codex/skills/volcengine-transcribe/scripts/`:
-
-- `transcribe_elevenlabs.py` — (to be replaced) ElevenLabs Scribe v2 ASR + Claude Sonnet polishing
-- `keyterms.txt` — Domain-specific terms for better ASR recognition (edit as needed)
-- `transcribe_volcengine.py` — Legacy: Volcengine Doubao flash API
-- `transcribe_volcengine_full.py` — Legacy: Chunked transcription for large files
+- `scripts/transcribe_fish.py` — Primary: Fish ASR (direct) + DeepSeek (direct) → memo.
+- `scripts/keyterms.txt` — Domain-specific terms for better ASR recognition (edit as needed).
+- `scripts/transcribe_volcengine.py` — Legacy: Volcengine Doubao flash API.
+- `scripts/transcribe_volcengine_full.py` — Legacy: chunked transcription for large files.
+- `scripts/transcribe_elevenlabs.py` — Legacy: ElevenLabs Scribe v2 (replaced by Fish).
 
 ## Output Directory
 `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Esther Workspace/Meeting Memo/`
@@ -27,14 +27,14 @@ All scripts live in `~/.codex/skills/volcengine-transcribe/scripts/`:
 ## Required Environment Variables
 
 ```
-ELEVENLABS_API_KEY          # ElevenLabs Scribe ASR
-ARK_API_KEY                 # DeepSeek V3 via Volcengine Ark (polishing + summary)
-ARK_MODEL                   # e.g. deepseek-v3-2-251201
-ARK_BASE_URL                # https://ark.cn-beijing.volces.com/api/v3
+FISH_API_KEY                # Fish Audio ASR (fish.audio/app/api-keys)
+DEEPSEEK_API_KEY            # DeepSeek (polishing + summary)
+DEEPSEEK_MODEL              # default: deepseek-chat
+DEEPSEEK_BASE_URL           # default: https://api.deepseek.com
 ```
 
 Optional:
 
 ```
-VOLCENGINE_SPEAKER_ALIASES  # Default speaker mappings (e.g. "1=Joe;2=Bob")
+VOLCENGINE_OBSIDIAN_MEETING_MEMO_DIR  # override output dir
 ```
