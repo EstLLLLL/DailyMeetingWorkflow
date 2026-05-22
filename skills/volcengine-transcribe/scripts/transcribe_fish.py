@@ -26,9 +26,11 @@ import json
 import mimetypes
 import os
 import re
+import shutil
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -162,6 +164,40 @@ def load_keyterms(keyterms_file: str | None, keyword_arg: str) -> list[str]:
 # ---------------------------------------------------------------------------
 # ffmpeg helpers (duration + chunk export)
 # ---------------------------------------------------------------------------
+
+# Apple Voice Memos / QuickTime audio that ffmpeg may not read by extension.
+APPLE_AUDIO_EXTS = {".qta"}
+
+
+def prepare_audio(audio_path: Path) -> Path:
+    """Convert Apple-only formats (e.g. iPhone Voice Memos .qta) to .m4a.
+
+    Returns the original path for already-supported formats; otherwise returns a
+    converted .m4a in a temp dir (which also keeps chunk work-dirs out of iCloud).
+    """
+    if audio_path.suffix.lower() not in APPLE_AUDIO_EXTS:
+        return audio_path
+
+    out = Path(tempfile.mkdtemp(prefix="meeting-audio-")) / f"{audio_path.stem}.m4a"
+    print(f"[prepare] converting {audio_path.suffix} -> .m4a ...", flush=True)
+    try:
+        subprocess.run(
+            ["ffmpeg", "-y", "-v", "error", "-i", str(audio_path), "-c:a", "aac", "-b:a", "128k", str(out)],
+            check=True, capture_output=True, text=True,
+        )
+        if out.exists() and out.stat().st_size > 0:
+            return out
+    except subprocess.CalledProcessError:
+        pass
+    if shutil.which("afconvert"):
+        subprocess.run(
+            ["afconvert", "-f", "m4af", "-d", "aac", str(audio_path), str(out)],
+            check=True, capture_output=True, text=True,
+        )
+        if out.exists() and out.stat().st_size > 0:
+            return out
+    raise SystemExit(f"Could not convert {audio_path.name} to .m4a (tried ffmpeg and afconvert).")
+
 
 def get_duration_seconds(audio_file: Path) -> float:
     result = subprocess.run(
@@ -680,10 +716,11 @@ def main() -> int:
     speaker_aliases = parse_speaker_aliases(args.speaker_alias)
     keyterms = load_keyterms(args.keyterms_file, args.keyword)
 
-    audio_path = Path(args.audio_source).expanduser().resolve()
-    if not audio_path.exists():
-        raise SystemExit(f"Audio file not found: {audio_path}")
-    source_label = audio_path.name
+    orig_path = Path(args.audio_source).expanduser().resolve()
+    if not orig_path.exists():
+        raise SystemExit(f"Audio file not found: {orig_path}")
+    source_label = orig_path.name  # keep the original filename for the memo/output naming
+    audio_path = prepare_audio(orig_path)
 
     print(f"[transcribe] checking duration of {source_label}...", flush=True)
     duration = get_duration_seconds(audio_path)

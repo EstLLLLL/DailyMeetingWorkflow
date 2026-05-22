@@ -76,6 +76,8 @@ bash skills/daily-meeting-minute/scripts/find_latest_recording.sh --latest
   根据语义推断，属最佳猜测。提供 `--speaker-alias` / 参会人名单能提高准确度，但不保证正确。
 - **22MB 上限**：Fish 上传上限约 22MB，脚本会用 ffmpeg 自动按时长分块（默认约 240s），
   分块结果带缓存（同名 `.fish-chunks-*` 目录），中断可续跑。
+- **输入格式**：iPhone 语音备忘录的 `.qta` 会自动转成 `.m4a`（ffmpeg，回退 macOS
+  `afconvert`）；wav/mp3/flac 等在分块时自动重编码为 AAC。原始文件名仍记录在 memo 里。
 - **最新录音按文件名日期判断**：iCloud 同步会刷新文件 mtime，所以 `find_latest_recording.sh`
   以文件名里的 `YYYYMMDD` 前缀判断「今天/最新」，mtime 仅作兜底排序。录音文件名需带日期前缀。
 - **DeepSeek 直连**：润色走 DeepSeek 官方 API，不经 Volcengine Ark；如需换平台改

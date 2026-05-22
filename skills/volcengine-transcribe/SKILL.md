@@ -45,7 +45,9 @@ audio → Fish Audio /v1/asr (direct) → DeepSeek (direct) polish + summary →
 - Long audio is chunked at ~240s (or smaller when a chunk would exceed ~22 MB).
   Chunk results are cached in a `.fish-chunks-*` sibling dir, so an interrupted run
   resumes without re-transcribing completed chunks.
-- Voice Memos `.qta` files must be converted to `.m4a` before transcription.
+- iPhone Voice Memos `.qta` files are converted to `.m4a` automatically (ffmpeg,
+  falling back to macOS `afconvert`) before transcription. The memo still records
+  the original `.qta` filename.
 - Memo output preferences: keep `Date` and `Original file`; a detailed summary
   (Discussion vs Interview framework, chosen automatically); a polished, readable
   transcript; replace generic speaker labels with names only when a mapping is given.
