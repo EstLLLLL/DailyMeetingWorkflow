@@ -22,7 +22,8 @@ This project defines the `/transcribe` Claude Code slash command for audio trans
 - `scripts/transcribe_elevenlabs.py` — Legacy: ElevenLabs Scribe v2 (replaced by Fish).
 
 ## Output Directory
-`~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Esther Workspace/Meeting Memo/`
+`~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Esther Workspace/Raw/meeting memo/`
+(override with `$MEETING_MEMO_DIR` or `--out-dir`).
 
 ## Required Environment Variables
 
@@ -36,5 +37,7 @@ DEEPSEEK_BASE_URL           # default: https://api.deepseek.com
 Optional:
 
 ```
-VOLCENGINE_OBSIDIAN_MEETING_MEMO_DIR  # override output dir
+MEETING_MEMO_DIR                      # output dir (preferred; falls back to the legacy var below)
+VOLCENGINE_OBSIDIAN_MEETING_MEMO_DIR  # legacy output-dir override
+VOLCENGINE_SPEAKER_ALIASES            # default speaker map, e.g. "1=Joe;2=Bob"
 ```
